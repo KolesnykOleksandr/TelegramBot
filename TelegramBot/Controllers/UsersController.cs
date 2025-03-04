@@ -8,12 +8,10 @@ namespace TelegramBot.Controllers
     public class UsersController : ControllerBase
     {
         private readonly IUserRepository _userRepository;
-        private readonly TelegramBotHost _bot;
 
-        public UsersController(IUserRepository userRepository, TelegramBotHost bot)
+        public UsersController(IUserRepository userRepository)
         {
             _userRepository = userRepository;
-            _bot = bot;
         }
 
         [HttpGet("GetUsers")]
@@ -28,19 +26,6 @@ namespace TelegramBot.Controllers
         {
             var result = await _userRepository.GetUser(user_id);
             return Ok(result);
-        }
-
-        [HttpPost("WendWeatherToAll/{city}")]
-        public async Task<IActionResult> PostWeather(string city)
-        {
-            var result = await _bot.SendWeatherToAll(city);
-
-            if (result == null)
-            {
-                return Ok();
-            }
-
-            return StatusCode(404, result);
         }
 
 

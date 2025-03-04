@@ -8,11 +8,27 @@ namespace TelegramBot.Controllers
     public class WeatherController : ControllerBase
     {
         public readonly IWeatherRepository _weatherRepository;
-        public WeatherController(IWeatherRepository weatherRepository)
+        private readonly TelegramBotHost _bot;
+
+        public WeatherController(IWeatherRepository weatherRepository, TelegramBotHost bot)
         {
             _weatherRepository = weatherRepository;
+            _bot = bot;
         }
 
+
+        [HttpPost("WendWeatherToAll/{city}")]
+        public async Task<IActionResult> PostWeather(string city)
+        {
+            var result = await _bot.SendWeatherToAll(city);
+
+            if (result == null)
+            {
+                return Ok();
+            }
+
+            return StatusCode(404, result);
+        }
 
         [HttpGet("GetWeather/{city}")]
         public async Task<IActionResult> GetWeather(string city)
