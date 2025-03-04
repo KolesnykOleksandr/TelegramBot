@@ -25,7 +25,7 @@ namespace TelegramBot.Repositories
         public async Task<User> GetUser(int user_id)
         {
             SqlConnection connection = GetConnection();
-            User user = await connection.QueryFirstOrDefaultAsync<User>($"select * from Users Where user_id = {user_id}");
+            User? user = await connection.QueryFirstOrDefaultAsync<User>($"select * from Users Where user_id = {user_id}");
 
             if (user != null)
             {
@@ -33,7 +33,6 @@ namespace TelegramBot.Repositories
                     $"SELECT * FROM WeatherHistory WHERE user_id = {user_id}"
                 )).ToList();
             }
-
 
             return user;
         }

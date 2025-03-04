@@ -7,6 +7,6 @@
         public required long chat_id { get; set; }
         public bool isBanned { get; set; }
 
-        public List<WeatherHistory> weather_history { get; set;}
+        public List<WeatherHistory>? weather_history { get; set; }
     }
 }

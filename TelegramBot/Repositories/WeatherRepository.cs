@@ -1,12 +1,9 @@
 ﻿using Dapper;
 using System.Data.SqlClient;
+using System.Text.Json;
 using TelegramBot.Dtos;
 using TelegramBot.Interfaces;
 using TelegramBot.Models;
-using System.Net.Http.Headers;
-using System.Text.Json;
-using System.Security.Cryptography;
-using Microsoft.AspNetCore.Identity;
 
 namespace TelegramBot.Repositories
 {
@@ -61,7 +58,7 @@ namespace TelegramBot.Repositories
             {
                 return "Місто не було знайдено🙈";
             }
-                var weatherHistory = new WeatherHistory
+            var weatherHistory = new WeatherHistory
             {
                 User_Id = user.user_id,
                 City = root.GetProperty("name").GetString() ?? "Unknown",
@@ -87,7 +84,7 @@ namespace TelegramBot.Repositories
 
 
 
-            
+
             return new WeatherDto
             {
                 City = weatherHistory.City,
@@ -118,7 +115,7 @@ namespace TelegramBot.Repositories
 
         private SqlConnection GetConnection()
         {
-            return new SqlConnection( _configuration.GetConnectionString("DefaultConnection"));
+            return new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
         }
 
     }

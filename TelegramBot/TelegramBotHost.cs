@@ -22,10 +22,8 @@ namespace TelegramBot
             bot = new TelegramBotClient(token);
             _weatherRepository = new WeatherRepository(configuration);
             _userRepository = new UserRepository(configuration);
-            replyButtons = new ReplyKeyboardMarkup(new[]
-{
-                new KeyboardButton("🌤 Погода в Харкові")
-            })
+            replyButtons = new ReplyKeyboardMarkup(
+                new KeyboardButton("🌤 Погода в Харкові"))
             {
                 ResizeKeyboard = true
             };
@@ -45,24 +43,24 @@ namespace TelegramBot
             }
 
             string answer = $@"Адмін захотів усім повідомити про погоду у місті {city}
-🌍Місто: {(weather as WeatherDto).City}
-🌡Температура: {(weather as WeatherDto).Temperature}°C
-🌡Температура відчувається: {(weather as WeatherDto).FeelsLike}°C
-🌡Мінімальна температура: {(weather as WeatherDto).TempMin}°C
-🌡Максимальна температура: {(weather as WeatherDto).TempMax}°C
-🌬️Тиск: {(weather as WeatherDto).Pressure}Pa
-💧Вологість: {(weather as WeatherDto).Humidity}%
-💨Швидкість вітру: {(weather as WeatherDto).WindSpeed}м/с
-☁️Хмарність: {(weather as WeatherDto).Cloudiness}%
-🌤Погода: {(weather as WeatherDto).WeatherMain}
-📋Опис погоди: {(weather as WeatherDto).WeatherDescription}
-⏳Час: {(weather as WeatherDto).Timestamp}";
+🌍Місто: {((WeatherDto)weather).City}
+🌡Температура: {((WeatherDto)weather).Temperature}°C
+🌡Температура відчувається: {((WeatherDto)weather).FeelsLike}°C
+🌡Мінімальна температура: {((WeatherDto)weather).TempMin}°C
+🌡Максимальна температура: {((WeatherDto)weather).TempMax}°C
+🌬️Тиск: {((WeatherDto)weather).Pressure}Pa
+💧Вологість: {((WeatherDto)weather).Humidity}%
+💨Швидкість вітру: {((WeatherDto)weather).WindSpeed}м/с
+☁️Хмарність: {((WeatherDto)weather).Cloudiness}%
+🌤Погода: {((WeatherDto)weather).WeatherMain}
+📋Опис погоди: {((WeatherDto)weather).WeatherDescription}
+⏳Час: {((WeatherDto)weather).Timestamp}";
 
             var allusers = _userRepository.GetUsers();
 
             foreach (var user in allusers.Result)
             {
-                bot.SendTextMessageAsync(user.chat_id, answer, replyMarkup: replyButtons);
+                await bot.SendMessage(user.chat_id, answer, replyMarkup: replyButtons);
             }
 
             return null;
@@ -76,56 +74,52 @@ namespace TelegramBot
         {
             Console.WriteLine($"{update.Message.Chat.FirstName} {update.Message.Chat.LastName} пише " + update.Message.Text);
 
-
-
-
             if (update.Message.Text == "🌤 Погода в Харькові")
             {
-                await SendCityWeather("Харків", client, update);
+                await SendCityWeather("Харків", update);
             }
             else if (update.Message.Text == "/weather")
             {
-                client.SendTextMessageAsync(update.Message?.Chat.Id, "Будь ласка після команди /weather впишіть назву вашого міста", replyMarkup: replyButtons);
+                await bot.SendMessage(update.Message?.Chat.Id, "Будь ласка після команди /weather впишіть назву вашого міста", replyMarkup: replyButtons);
             }
             else if (update.Message.Text.StartsWith("/weather"))
             {
                 string city = update.Message.Text.Substring(9);
 
-                SendCityWeather(city, client, update);
+                await SendCityWeather(city, update);
             }
             else
             {
-                client.SendTextMessageAsync(update.Message?.Chat.Id, "Слава Україні", replyMarkup: replyButtons);
+                await bot.SendMessage(update.Message?.Chat.Id, "Слава Україні", replyMarkup: replyButtons);
             }
-
-
         }
 
-        private async Task SendCityWeather(string city, ITelegramBotClient client, Update update) {
+        private async Task SendCityWeather(string city, Update update)
+        {
             object weather = _weatherRepository.GetWeatherAsync(city, update.Message.Chat.Username, update.Message.Chat.Id).Result;
 
             if (weather is string)
             {
-                client.SendTextMessageAsync(update.Message?.Chat.Id, weather as string, replyMarkup: replyButtons);
+                await bot.SendMessage(update.Message?.Chat.Id, weather as string, replyMarkup: replyButtons);
                 return;
             }
 
-            string answer = $@"🌍Місто: {(weather as WeatherDto).City}
-🌡Температура: {(weather as WeatherDto).Temperature}°C
-🌡Температура відчувається: {(weather as WeatherDto).FeelsLike}°C
-🌡Мінімальна температура: {(weather as WeatherDto).TempMin}°C
-🌡Максимальна температура: {(weather as WeatherDto).TempMax}°C
-🌬️Тиск: {(weather as WeatherDto).Pressure}Pa
-💧Вологість: {(weather as WeatherDto).Humidity}%
-💨Швидкість вітру: {(weather as WeatherDto).WindSpeed}м/с
-☁️Хмарність: {(weather as WeatherDto).Cloudiness}%
-🌤Погода: {(weather as WeatherDto).WeatherMain}
-📋Опис погоди: {(weather as WeatherDto).WeatherDescription}
-⏳Час: {(weather as WeatherDto).Timestamp}";
+            string answer = $@"🌍Місто: {((WeatherDto)weather).City}
+🌡Температура: {((WeatherDto)weather).Temperature}°C
+🌡Температура відчувається: {((WeatherDto)weather).FeelsLike}°C
+🌡Мінімальна температура: {((WeatherDto)weather).TempMin}°C
+🌡Максимальна температура: {((WeatherDto)weather).TempMax}°C
+🌬️Тиск: {((WeatherDto)weather).Pressure}Pa
+💧Вологість: {((WeatherDto)weather).Humidity}%
+💨Швидкість вітру: {((WeatherDto)weather).WindSpeed}м/с
+☁️Хмарність: {((WeatherDto)weather).Cloudiness}%
+🌤Погода: {((WeatherDto)weather).WeatherMain}
+📋Опис погоди: {((WeatherDto)weather).WeatherDescription}
+⏳Час: {((WeatherDto)weather).Timestamp}";
 
-            client.SendTextMessageAsync(update.Message?.Chat.Id, answer);
+            await bot.SendMessage(update.Message?.Chat.Id, answer);
 
 
         }
-
-    } }
+    }
+}

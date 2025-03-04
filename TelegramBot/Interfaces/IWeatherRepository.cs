@@ -1,7 +1,4 @@
-﻿using TelegramBot.Dtos;
-using TelegramBot.Models;
-
-namespace TelegramBot.Interfaces
+﻿namespace TelegramBot.Interfaces
 {
     public interface IWeatherRepository
     {

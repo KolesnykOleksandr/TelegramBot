@@ -1,6 +1,4 @@
-﻿using TelegramBot.Models;
-
-namespace TelegramBot.Dtos
+﻿namespace TelegramBot.Dtos
 {
     public class WeatherDto
     {

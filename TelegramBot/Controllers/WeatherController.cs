@@ -1,7 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using TelegramBot.Dtos;
 using TelegramBot.Interfaces;
-using TelegramBot.Models;
 
 namespace TelegramBot.Controllers
 {
