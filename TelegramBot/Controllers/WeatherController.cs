@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using TelegramBot.Interfaces;
 
 namespace TelegramBot.Controllers
@@ -9,11 +10,13 @@ namespace TelegramBot.Controllers
     {
         public readonly IWeatherRepository _weatherRepository;
         private readonly TelegramBotHost _bot;
+        private readonly IConfiguration _configuration;
 
-        public WeatherController(IWeatherRepository weatherRepository, TelegramBotHost bot)
+        public WeatherController(IWeatherRepository weatherRepository, TelegramBotHost bot, IConfiguration configuration)
         {
             _weatherRepository = weatherRepository;
             _bot = bot;
+            _configuration = configuration;
         }
 
 
@@ -33,7 +36,11 @@ namespace TelegramBot.Controllers
         [HttpGet("GetWeather/{city}")]
         public async Task<IActionResult> GetWeather(string city)
         {
-            var result = await _weatherRepository.GetWeatherAsync(city, "admin", 853719718);
+            var result = await _weatherRepository.GetWeatherAsync(
+                city, 
+                "admin",
+                _configuration.GetValue<long>("ChatIds:AdminTelegramId")
+                );
             return Ok(result);
         }
     }

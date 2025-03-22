@@ -19,14 +19,25 @@ namespace TelegramBot.Repositories
         public async Task<object> GetWeatherAsync(string city, string nickname, long chat_id)
         {
             SqlConnection connection = GetConnection();
-
-            var user = await connection.QueryFirstOrDefaultAsync<User>($"select * from Users where nickname = '{nickname}'");
+            
+            var user = await connection.QueryFirstOrDefaultAsync<User>(
+                "SELECT * FROM Users WHERE nickname = @nickname",
+                new { nickname }
+            );
 
             if (user == null)
             {
-                await connection.ExecuteAsync($"Insert into Users(nickname, isBanned, chat_id) Values ('{nickname}', 0, {chat_id})");
-                user = await connection.QueryFirstOrDefaultAsync<User>($"select * from Users where nickname = '{nickname}'");
+                await connection.ExecuteAsync(
+                    "INSERT INTO Users (nickname, isBanned, chat_id) VALUES (@nickname, 0, @chat_id)",
+                    new { nickname, chat_id }
+                );
+
+                user = await connection.QueryFirstOrDefaultAsync<User>(
+                    "SELECT * FROM Users WHERE nickname = @nickname",
+                    new { nickname }
+                );
             }
+
 
             if (user.isBanned)
             {
@@ -37,11 +48,11 @@ namespace TelegramBot.Repositories
             var request = new HttpRequestMessage
             {
                 Method = HttpMethod.Get,
-                RequestUri = new Uri($"https://open-weather13.p.rapidapi.com/city/{city}/UK"),
+                RequestUri = new Uri(_configuration["ApiSettings:RequestUri"] + $"{city}/UK"),
                 Headers =
                 {
-                    { "x-rapidapi-key", "62957d38e5msh3c226372cb02cc5p1d9b28jsnb452512bc183" },
-                    { "x-rapidapi-host", "open-weather13.p.rapidapi.com" },
+                    { "x-rapidapi-key", _configuration["ApiSettings:RapidApiKey"] },
+                    { "x-rapidapi-host", _configuration["ApiSettings:RapidApiHost"] },
                 },
             };
             var response = await client.SendAsync(request);

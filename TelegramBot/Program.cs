@@ -14,7 +14,7 @@ builder.Services.AddScoped<IWeatherRepository, WeatherRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 
-TelegramBotHost bot = new TelegramBotHost("8165256332:AAEaCZ8H3SBHY-XlLuehE8ndaUFl_XtQrYY", builder.Configuration);
+TelegramBotHost bot = new TelegramBotHost(builder.Configuration);
 bot.Start();
 
 

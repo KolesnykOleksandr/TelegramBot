@@ -25,12 +25,12 @@ namespace TelegramBot.Repositories
         public async Task<User> GetUser(int user_id)
         {
             SqlConnection connection = GetConnection();
-            User? user = await connection.QueryFirstOrDefaultAsync<User>($"select * from Users Where user_id = {user_id}");
+            User? user = await connection.QueryFirstOrDefaultAsync<User>($"select * from Users Where user_id = @user_id", new { user_id });
 
             if (user != null)
             {
                 user.weather_history = (await connection.QueryAsync<WeatherHistory>(
-                    $"SELECT * FROM WeatherHistory WHERE user_id = {user_id}"
+                    $"SELECT * FROM WeatherHistory WHERE user_id = @user_id", new { user_id }
                 )).ToList();
             }
 
@@ -40,13 +40,13 @@ namespace TelegramBot.Repositories
         public async Task BanUser(int user_id)
         {
             SqlConnection connection = GetConnection();
-            await connection.ExecuteAsync($"UPDATE users SET isBanned = 1 WHERE user_id = {user_id}");
+            await connection.ExecuteAsync($"UPDATE users SET isBanned = 1 WHERE user_id = @user_id", new { user_id });
         }
 
         public async Task UnbanUser(int user_id)
         {
             SqlConnection connection = GetConnection();
-            await connection.ExecuteAsync($"UPDATE users SET isBanned = 0 WHERE user_id = {user_id}");
+            await connection.ExecuteAsync($"UPDATE users SET isBanned = 0 WHERE user_id = @user_id", new { user_id });
         }
 
         private SqlConnection GetConnection()

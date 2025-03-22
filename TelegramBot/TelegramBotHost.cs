@@ -17,9 +17,13 @@ namespace TelegramBot
         ReplyKeyboardMarkup replyButtons;
 
 
-        public TelegramBotHost(string token, IConfiguration configuration)
+        public TelegramBotHost(IConfiguration configuration)
         {
-            bot = new TelegramBotClient(token);
+            var botToken = configuration["TelegramBotSettings:Token"]
+               ?? throw new InvalidOperationException("Telegram bot token is missing in configuration.");
+
+            bot = new TelegramBotClient(botToken);
+
             _weatherRepository = new WeatherRepository(configuration);
             _userRepository = new UserRepository(configuration);
             replyButtons = new ReplyKeyboardMarkup(
