@@ -19,23 +19,54 @@ namespace TelegramBot.Repositories
         public async Task<object> GetWeatherAsync(string city, string nickname, long chat_id)
         {
             SqlConnection connection = GetConnection();
-            
-            var user = await connection.QueryFirstOrDefaultAsync<User>(
-                "SELECT * FROM Users WHERE nickname = @nickname",
-                new { nickname }
-            );
+            User? user = null;
+            try
+            {
+                try
+                {
+                    user = await connection.QueryFirstOrDefaultAsync<User>
+                        (
+                    "SELECT * FROM Users WHERE nickname = @nickname",
+                    new { nickname }
+                    );
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                    throw new Exception(ex.Message, ex);
+                }
+            }
+            finally
+            {
+                connection.Close();
+            }
 
             if (user == null)
             {
-                await connection.ExecuteAsync(
-                    "INSERT INTO Users (nickname, isBanned, chat_id) VALUES (@nickname, 0, @chat_id)",
-                    new { nickname, chat_id }
-                );
+                try
+                {
+                    try
+                    {
+                        await connection.ExecuteAsync(
+                            "INSERT INTO Users (nickname, isBanned, chat_id) VALUES (@nickname, 0, @chat_id)",
+                            new { nickname, chat_id }
+                            );
 
-                user = await connection.QueryFirstOrDefaultAsync<User>(
-                    "SELECT * FROM Users WHERE nickname = @nickname",
-                    new { nickname }
-                );
+                        user = await connection.QueryFirstOrDefaultAsync<User>(
+                            "SELECT * FROM Users WHERE nickname = @nickname",
+                            new { nickname }
+                        );
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                        throw new Exception(ex.Message, ex);
+                    }
+                }
+                finally
+                {
+                    connection.Close();
+                }
             }
 
 
@@ -55,11 +86,28 @@ namespace TelegramBot.Repositories
                     { "x-rapidapi-host", _configuration["ApiSettings:RapidApiHost"] },
                 },
             };
-            var response = await client.SendAsync(request);
+
+            string? body = null;
+            try
+            {
+                try
+                {
+                    var response = await client.SendAsync(request);
 
 
-            response.EnsureSuccessStatusCode();
-            var body = await response.Content.ReadAsStringAsync();
+                    response.EnsureSuccessStatusCode();
+                    body = await response.Content.ReadAsStringAsync();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                    throw new Exception(ex.Message, ex);
+                }
+            }
+            finally
+            {
+                connection.Close();
+            }
 
             using var jsonDoc = JsonDocument.Parse(body);
             var root = jsonDoc.RootElement;
@@ -86,13 +134,26 @@ namespace TelegramBot.Repositories
                 Timestamp = root.GetProperty("dt").GetInt32(),
                 User = user
             };
-
-            await connection.ExecuteAsync(
+            try
+            {
+                try
+                {
+                    await connection.ExecuteAsync(
                 $"Insert into WeatherHistory(user_id, city, temperature, feels_like, temp_min, temp_max, pressure," +
                 $"humidity, wind_speed, cloudiness, weather_main, weather_description, timestamp) " +
                 $"Values (@user_id, @city, @temperature, @feels_like, @temp_min, @temp_max, @pressure," +
                 $" @humidity, @wind_speed, @cloudiness, @weather_main, @weather_description, @timestamp)", weatherHistory);
-
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                    throw new Exception(ex.Message, ex);
+                }
+            }
+            finally
+            {
+                connection.Close();
+            }
 
 
 
