@@ -16,6 +16,7 @@
         public required string Weather_Main { get; set; }
         public required string Weather_Description { get; set; }
         public required int Timestamp { get; set; }
+
         public required User User { get; set; }
     }
 

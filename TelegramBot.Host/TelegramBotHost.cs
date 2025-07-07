@@ -1,47 +1,48 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 using TelegramBot.Application.Dtos;
 using TelegramBot.Application.Interfaces;
-using TelegramBot.Infrastructure.Repositories;
-using TelegramBot.Application.Models;
 
 namespace TelegramBot
 {
-    public class TelegramBotHost
+    public static class TelegramBotHost
     {
-        TelegramBotClient bot;
+        private static TelegramBotClient _bot;
+        private static IServiceProvider _serviceProvider;
+        private static ReplyKeyboardMarkup _replyButtons;
 
-        private readonly IWeatherRepository _weatherRepository;
-        private readonly IUserRepository _userRepository;
-        ReplyKeyboardMarkup replyButtons;
-
-        public TelegramBotHost(IConfiguration configuration)
+        public static void Initialize(IConfiguration configuration, IServiceProvider serviceProvider)
         {
             var botToken = configuration["TelegramBotSettings:Token"]
-               ?? throw new InvalidOperationException("Telegram bot token is missing in configuration.");
+                ?? throw new InvalidOperationException("Telegram bot token is missing in configuration.");
 
-            bot = new TelegramBotClient(botToken);
-
-            _weatherRepository = new WeatherRepository(configuration);
-            _userRepository = new UserRepository(configuration);
-            replyButtons = new ReplyKeyboardMarkup(
+            _bot = new TelegramBotClient(botToken);
+            _serviceProvider = serviceProvider;
+            _replyButtons = new ReplyKeyboardMarkup(
                 new KeyboardButton("🌤 Погода в Харкові"))
             {
                 ResizeKeyboard = true
             };
         }
 
-        public void Start()
+        public static void Start()
         {
-            bot.StartReceiving(GettingMessageHanlder, ErrorHandler);
+            _bot.DeleteWebhook();
+
+            _bot.StartReceiving(GettingMessageHanlder, ErrorHandler);
         }
 
-        public async Task<string?> SendWeatherToAll(string city)
+        public static async Task<string?> SendWeatherToAll(string city)
         {
-            object weather = await _weatherRepository.GetWeatherAsync(city, "admin", 0);
+            using var scope = _serviceProvider.CreateScope();
+            var weatherRepository = scope.ServiceProvider.GetRequiredService<IWeatherRepository>();
+            var userRepository = scope.ServiceProvider.GetRequiredService<IUserRepository>();
+
+            object weather = await weatherRepository.GetWeatherAsync(city, "admin", 0);
             if (weather is string)
             {
                 return (weather as string);
@@ -61,32 +62,32 @@ namespace TelegramBot
 📋Опис погоди: {((WeatherDto)weather).WeatherDescription}
 ⏳Час: {((WeatherDto)weather).Timestamp}";
 
-            var allusers = await _userRepository.GetUsers();
+            var allusers = await userRepository.GetUsers();
 
             foreach (var user in allusers)
             {
-                await bot.SendMessage(user.chat_id, answer, replyMarkup: replyButtons);
+                await _bot.SendMessage(user.chat_id, answer, replyMarkup: _replyButtons);
             }
 
             return null;
         }
 
-        private async Task ErrorHandler(ITelegramBotClient client, Exception exception, HandleErrorSource source, CancellationToken token)
+        private static async Task ErrorHandler(ITelegramBotClient client, Exception exception, HandleErrorSource source, CancellationToken token)
         {
             Console.WriteLine(exception.Message);
         }
 
-        private async Task GettingMessageHanlder(ITelegramBotClient client, Update update, CancellationToken token)
+        private static async Task GettingMessageHanlder(ITelegramBotClient client, Update update, CancellationToken token)
         {
             Console.WriteLine($"{update.Message.Chat.FirstName} {update.Message.Chat.LastName} пише " + update.Message.Text);
 
-            if (update.Message.Text == "🌤 Погода в Харькові")
+            if (update.Message.Text == "🌤 Погода в Харкові")
             {
                 await SendCityWeather("Харків", update);
             }
             else if (update.Message.Text == "/weather")
             {
-                await bot.SendMessage(update.Message?.Chat.Id, "Будь ласка після команди /weather впишіть назву вашого міста", replyMarkup: replyButtons);
+                await _bot.SendMessage(update.Message?.Chat.Id, "Будь ласка після команди /weather впишіть назву вашого міста", replyMarkup: _replyButtons);
             }
             else if (update.Message.Text.StartsWith("/weather"))
             {
@@ -96,17 +97,20 @@ namespace TelegramBot
             }
             else
             {
-                await bot.SendMessage(update.Message?.Chat.Id, "Слава Україні", replyMarkup: replyButtons);
+                await _bot.SendMessage(update.Message?.Chat.Id, "Слава Україні", replyMarkup: _replyButtons);
             }
         }
 
-        private async Task SendCityWeather(string city, Update update)
+        private static async Task SendCityWeather(string city, Update update)
         {
-            object weather = _weatherRepository.GetWeatherAsync(city, update.Message.Chat.Username, update.Message.Chat.Id).Result;
+            using var scope = _serviceProvider.CreateScope();
+            var weatherRepository = scope.ServiceProvider.GetRequiredService<IWeatherRepository>();
+
+            object weather = await weatherRepository.GetWeatherAsync(city, update.Message.Chat.Username, update.Message.Chat.Id);
 
             if (weather is string)
             {
-                await bot.SendMessage(update.Message?.Chat.Id, weather as string, replyMarkup: replyButtons);
+                await _bot.SendMessage(update.Message?.Chat.Id, weather as string, replyMarkup: _replyButtons);
                 return;
             }
 
@@ -123,7 +127,7 @@ namespace TelegramBot
 📋Опис погоди: {((WeatherDto)weather).WeatherDescription}
 ⏳Час: {((WeatherDto)weather).Timestamp}";
 
-            await bot.SendMessage(update.Message?.Chat.Id, answer);
+            await _bot.SendMessage(update.Message?.Chat.Id, answer);
         }
     }
 }

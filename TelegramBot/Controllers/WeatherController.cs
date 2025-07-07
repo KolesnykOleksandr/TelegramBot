@@ -9,18 +9,15 @@ namespace TelegramBot.Api.Controllers
     public class WeatherController : ControllerBase
     {
         private readonly IWeatherRepository _weatherRepository;
-        private readonly TelegramBotHost _bot;
         private readonly IConfiguration _configuration;
         private readonly ILogger<WeatherController> _logger;
 
         public WeatherController(
             IWeatherRepository weatherRepository,
-            TelegramBotHost bot,
             IConfiguration configuration,
             ILogger<WeatherController> logger)
         {
             _weatherRepository = weatherRepository;
-            _bot = bot;
             _configuration = configuration;
             _logger = logger;
         }
@@ -32,7 +29,7 @@ namespace TelegramBot.Api.Controllers
 
             try
             {
-                var result = await _bot.SendWeatherToAll(city);
+                var result = await TelegramBotHost.SendWeatherToAll(city);
 
                 if (result == null)
                 {

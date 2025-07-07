@@ -1,9 +1,8 @@
 ﻿using Dapper;
+using Microsoft.Extensions.Configuration;
 using System.Data.SqlClient;
 using TelegramBot.Application.Interfaces;
 using TelegramBot.Application.Models;
-using TelegramBot.Application.Interfaces;
-using Microsoft.Extensions.Configuration;
 
 namespace TelegramBot.Infrastructure.Repositories
 {
@@ -120,6 +119,5 @@ namespace TelegramBot.Infrastructure.Repositories
         {
             return new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
         }
-
     }
 }
