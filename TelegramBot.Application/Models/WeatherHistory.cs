@@ -1,4 +1,4 @@
-﻿namespace TelegramBot.Models
+﻿namespace TelegramBot.Application.Models
 {
     public class WeatherHistory
     {

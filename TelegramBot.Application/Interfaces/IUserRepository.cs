@@ -1,6 +1,6 @@
-﻿using TelegramBot.Models;
+﻿using TelegramBot.Application.Models;
 
-namespace TelegramBot.Interfaces
+namespace TelegramBot.Application.Interfaces
 {
     public interface IUserRepository
     {

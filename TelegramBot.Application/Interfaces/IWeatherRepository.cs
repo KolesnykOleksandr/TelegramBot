@@ -1,4 +1,4 @@
-﻿namespace TelegramBot.Interfaces
+﻿namespace TelegramBot.Application.Interfaces
 {
     public interface IWeatherRepository
     {

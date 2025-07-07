@@ -1,11 +1,12 @@
 ﻿using Dapper;
+using Microsoft.Extensions.Configuration;
 using System.Data.SqlClient;
 using System.Text.Json;
-using TelegramBot.Dtos;
-using TelegramBot.Interfaces;
-using TelegramBot.Models;
+using TelegramBot.Application.Dtos;
+using TelegramBot.Application.Interfaces;
+using TelegramBot.Application.Models;
 
-namespace TelegramBot.Repositories
+namespace TelegramBot.Infrastructure.Repositories
 {
     public class WeatherRepository : IWeatherRepository
     {

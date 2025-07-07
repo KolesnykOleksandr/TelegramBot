@@ -2,7 +2,7 @@
 using System;
 using System.Diagnostics;
 
-namespace TelegramBot
+namespace TelegramBot.Infrastructure.Logging
 {
     public class ConsoleLogger : ILogger
     {

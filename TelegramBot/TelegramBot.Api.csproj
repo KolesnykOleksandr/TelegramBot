@@ -13,4 +13,10 @@
     <PackageReference Include="Telegram.Bot" Version="22.4.4" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\TelegramBot.Application\TelegramBot.Application.csproj" />
+    <ProjectReference Include="..\TelegramBot.Host\TelegramBot.Host.csproj" />
+    <ProjectReference Include="..\TelegramBot.Infrastructure\TelegramBot.Infrastructure.csproj" />
+  </ItemGroup>
+
 </Project>

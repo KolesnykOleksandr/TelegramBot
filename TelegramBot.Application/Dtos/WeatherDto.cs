@@ -1,4 +1,4 @@
-﻿namespace TelegramBot.Dtos
+﻿namespace TelegramBot.Application.Dtos
 {
     public class WeatherDto
     {

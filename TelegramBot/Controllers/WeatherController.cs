@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
-using TelegramBot.Interfaces;
+using TelegramBot.Application.Interfaces;
 
-namespace TelegramBot.Controllers
+namespace TelegramBot.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]

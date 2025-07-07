@@ -1,9 +1,11 @@
 ﻿using Dapper;
 using System.Data.SqlClient;
-using TelegramBot.Interfaces;
-using TelegramBot.Models;
+using TelegramBot.Application.Interfaces;
+using TelegramBot.Application.Models;
+using TelegramBot.Application.Interfaces;
+using Microsoft.Extensions.Configuration;
 
-namespace TelegramBot.Repositories
+namespace TelegramBot.Infrastructure.Repositories
 {
     public class UserRepository : IUserRepository
     {

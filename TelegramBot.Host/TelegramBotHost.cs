@@ -1,10 +1,12 @@
-﻿using Telegram.Bot;
+﻿using Microsoft.Extensions.Configuration;
+using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
-using TelegramBot.Dtos;
-using TelegramBot.Interfaces;
-using TelegramBot.Repositories;
+using TelegramBot.Application.Dtos;
+using TelegramBot.Application.Interfaces;
+using TelegramBot.Infrastructure.Repositories;
+using TelegramBot.Application.Models;
 
 namespace TelegramBot
 {
@@ -15,7 +17,6 @@ namespace TelegramBot
         private readonly IWeatherRepository _weatherRepository;
         private readonly IUserRepository _userRepository;
         ReplyKeyboardMarkup replyButtons;
-
 
         public TelegramBotHost(IConfiguration configuration)
         {
@@ -40,7 +41,7 @@ namespace TelegramBot
 
         public async Task<string?> SendWeatherToAll(string city)
         {
-            object weather = _weatherRepository.GetWeatherAsync(city, "admin", 0).Result;
+            object weather = await _weatherRepository.GetWeatherAsync(city, "admin", 0);
             if (weather is string)
             {
                 return (weather as string);
@@ -60,9 +61,9 @@ namespace TelegramBot
 📋Опис погоди: {((WeatherDto)weather).WeatherDescription}
 ⏳Час: {((WeatherDto)weather).Timestamp}";
 
-            var allusers = _userRepository.GetUsers();
+            var allusers = await _userRepository.GetUsers();
 
-            foreach (var user in allusers.Result)
+            foreach (var user in allusers)
             {
                 await bot.SendMessage(user.chat_id, answer, replyMarkup: replyButtons);
             }
@@ -74,6 +75,7 @@ namespace TelegramBot
         {
             Console.WriteLine(exception.Message);
         }
+
         private async Task GettingMessageHanlder(ITelegramBotClient client, Update update, CancellationToken token)
         {
             Console.WriteLine($"{update.Message.Chat.FirstName} {update.Message.Chat.LastName} пише " + update.Message.Text);
@@ -122,8 +124,6 @@ namespace TelegramBot
 ⏳Час: {((WeatherDto)weather).Timestamp}";
 
             await bot.SendMessage(update.Message?.Chat.Id, answer);
-
-
         }
     }
 }
